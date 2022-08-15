@@ -1,0 +1,79 @@
+<header class="navbar navbar-fixed-top navbar-inverse">
+<div class="container">
+<%= link_to "sample app", root_path, id: "logo" %>
+<nav>
+
+<div class="navbar-header">
+<button type="button" class="navbar-toggle collapsed"
+data-toggle="collapse"
+data-target="#bs-example-navbar-collapse-1"
+aria-expanded="false">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+</div>
+<ul class="nav navbar-nav navbar-right collapse navbar-collapse"
+id="bs-example-navbar-collapse-1">
+
+<ul class="nav navbar-nav navbar-right">
+<li><%= link_to "Home", root_path %></li>
+<li><%= link_to "Help", help_path %></li>
+<% # <% if logged_in? %> 
+<% if user_signed_in? %>
+<% if can? :destroy, User %>
+<li><%= link_to "Users", users_path %></li>
+<li><%= link_to "List Report", list_report_path %></li>
+<% end %>
+
+<li class="dropdown">
+  <a href="<%= users_read_path(current_user.id) %>" onclick="read_notification()" class="dropdown-toggle" data-toggle="dropdown" id="noti-dropdown">
+    Notification <b class="notification"></b>
+    <span class="badge" id ="notification-counter-<%= current_user.id %>">
+      <% unless current_user.readed_notification? %>
+        <%= Micropost.all_unread_replies(current_user.id).count + Micropost.all_unread_reactions(current_user.id).count %>
+      <% else %>
+        0
+      <% end %>
+    </span>
+  </a>
+  <ul class="dropdown-menu" id = "notification-menu-<%= current_user.id %>">
+    <% Micropost.all_notification(current_user.id).each do |notification| %>
+      <%= render "shared/notification", micropost: notification %>
+    <% end %>
+  </ul>
+</li>
+
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+Account <b class="caret"></b>
+</a>
+<ul class="dropdown-menu">
+<li><%= link_to "Profile", current_user %></li>
+<li><%= link_to "Settings", edit_user_path(current_user) %></li>
+<li class="divider"></li>
+<li>
+<%= link_to "Log out", logout_path, method: :delete %>
+</li>
+</ul>
+</li>
+<% else %>
+<li><%= link_to "Log in", login_path %></li>
+<% end %>
+</ul>
+</ul>
+</nav>
+</div>
+</header>
+
+<script type="text/javascript">
+  function read_notification() {
+    <% if current_user.present? %>
+      $.ajax({
+        type: "PATCH",
+        url: "<%= users_read_path(current_user.id) %>",
+      })
+    <% end %>
+  }
+</script>
